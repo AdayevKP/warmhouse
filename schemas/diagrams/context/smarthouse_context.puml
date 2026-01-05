@@ -1,4 +1,6 @@
 @startuml smarthouse_context
+!theme C4_green from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+
 !include <C4/C4_Context>
 
 Person(user, "User", "Home owner")
