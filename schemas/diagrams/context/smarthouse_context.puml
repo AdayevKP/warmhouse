@@ -1,11 +1,11 @@
 @startuml smarthouse_context
-!theme C4_green from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
 
 !include <C4/C4_Context>
 
 Person(user, "User", "Home owner")
 System(smarthouse, "Smart House", "Allows users to monitor smart devices and turn them on/off")
-Rel(user, smarthouse, "Views smart devices data, turns on/off them")
+Rel(user, smarthouse, "Views smart devices data, controls smart devices")
 
 System_Ext(smart_device, "Smart devices", "Smart device that can be installed to user's house and can communicate with Smart House system")
 Rel(smarthouse, smart_device, "Gets data from devices, controls devices")
