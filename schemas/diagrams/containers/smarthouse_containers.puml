@@ -25,8 +25,9 @@ System_Boundary(smarthouse_system, "Smart House") {
     Rel(sh_monitoring, sh_sessions_kv, "Reads")
     Rel(sh_ui, sh_monitoring, "Api calls", "HTTP/REST")
     Rel(sh_monitoring, sh_monitoring_db, "Reads/Writes", "SQL")
-    Rel_U(sh_monitoring, sh_monitoring_queue, "Reads")
-    Rel_U(sh_monitoring, sh_s3, "Reads") 
+    Rel_U(sh_monitoring, sh_monitoring_queue, "Reads/Writes")
+    Rel_U(sh_monitoring, sh_s3, "Reads/Writes") 
+    Rel(sh_monitoring, smart_device, "Collect devices data", "HTTP/MQTT")
 
     Container(sh_house_management, "House Management API", "Container: Backend api app", "Control devices, allows to create custom scenarios")
     ContainerDb(sh_house_db, "Database", "Container: PostgreSQL")
@@ -41,9 +42,7 @@ System_Boundary(smarthouse_system, "Smart House") {
     Rel(sh_devices_management, sh_sessions_kv, "Reads")
     Rel(sh_ui, sh_devices_management, "Api calls", "HTTP/REST")
     Rel(sh_devices_management, sh_devices_db, "Reads/Writes", "SQL")
-    Rel(sh_devices_management, smart_device, "Gets data from devices, register devices in system", "HTTP/MQTT")
-    Rel(sh_devices_management, sh_monitoring_queue, "Saves devices data log")
-    Rel(sh_devices_management, sh_s3, "Puts devices files data")
+    Rel(sh_devices_management, smart_device, "Register devices in system", "HTTP/MQTT")
 
     ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
     Rel(sh_devices_management, sh_devices_updates_queue, "Puts devices updates")
