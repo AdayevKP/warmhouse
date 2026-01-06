@@ -19,18 +19,19 @@ jobs:
     - name: Set up Java
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
+        java-version: '25'
         distribution: temurin
+        check-latest: true
 
     - name: Install PlantUML
       run: sudo apt-get install plantuml
 
     - name: Generate Diagrams
       run: |
-        plantuml schemas/diagrams/context/*.puml
-        plantuml schemas/diagrams/containers/*.puml
-        plantuml schemas/diagrams/components/*.puml
-        plantuml schemas/diagrams/code/*.puml
+        plantuml -tsvg schemas/diagrams/context/*.puml
+        plantuml -tsvg schemas/diagrams/containers/*.puml
+        plantuml -tsvg schemas/diagrams/components/*.puml
+        plantuml -tsvg schemas/diagrams/code/*.puml
 
     - name: Commit Diagrams
       run: |
