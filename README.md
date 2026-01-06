@@ -86,7 +86,8 @@
 
 ![smarthouse_user_components](schemas/diagrams/components/smarthouse_user_components.svg)
 ![smarthouse_monitorings_components](schemas/diagrams/components/smarthouse_monitoring_components.svg)
-![smarthouse_monitorings_components](schemas/diagrams/components/smarthouse_devices_management_components.svg)
+![smarthouse_devices_management_components](schemas/diagrams/components/smarthouse_devices_management_components.svg)
+![smarthouse_house_management_components](schemas/diagrams/components/smarthouse_house_management_components.svg)
 
 **Диаграмма кода (Code)**
 
