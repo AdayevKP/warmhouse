@@ -1,0 +1,46 @@
+@startuml smarthouse_devices_management_components
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Ext(smart_device, "Smart devices", "Smart device that can be installed to user's house and can communicate with Smart House system")
+
+System_Boundary(smarthouse_system, "Smart House") {
+    Container(sh_ui, "Browser App", "Container: Frontend web app", "Provides smart house services interface via web browser")
+    
+    ContainerDb(sh_sessions_kv, "Key-Value Database", "Container: Redis", "Stores active users sessions")
+
+    Container_Boundary(sh_devices_management, "Devices Management API", "Container: Backend api app", "Registers devices, gets data from devices") {
+        Component(api_component, "Api layer", "Handles HTTP requests")
+
+        Component(auth_component, "Authentification component", "Users authentification")
+        Component(message_handler, "Messages handler", "Handles devices updates messages")
+    
+        Component(devices_component, "Devices componenet", "Search, register and pull devices updates")
+        Component(repository, "Devices repository", "Database access")
+        Component(devices_service, "Devices Service", "Devices management")
+    }
+    ContainerDb(sh_devices_db, "Database", "Container: PostgreSQL", "")
+    
+    Rel(api_component, auth_component, "Check session expiration")
+    Rel(api_component, devices_service, "Manage devices")
+
+    Rel(devices_service, repository, "Gets devices data")
+    Rel(devices_service, devices_component, "Add/update/delete devices")
+
+    Rel(devices_component, message_handler, "Push devices updates")
+    Rel(devices_component, repository, "Reads\Writes devices data")
+
+    Rel(auth_component, sh_sessions_kv, "Reads")
+    Rel(sh_ui, api_component, "Api calls", "HTTP/REST")
+    Rel(repository, sh_devices_db, "Reads/Writes", "SQL")
+    Rel(devices_component, smart_device, "Gets devices info", "HTTP/MQTT")
+
+    ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
+    Rel(message_handler, sh_devices_updates_queue, "Puts devices updates")
+}
+
+SHOW_LEGEND()
+@enduml
