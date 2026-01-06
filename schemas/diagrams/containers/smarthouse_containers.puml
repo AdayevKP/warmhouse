@@ -19,13 +19,13 @@ System_Boundary(smarthouse_system, "Smart House") {
 
     Container(sh_monitoring, "Monitoring API", "Container: Backend api app", "Provides monitoring data for user's devices")
     ContainerDb(sh_monitoring_db, "Database", "Container: PostgreSQL")
-    ContainerQueue(sh_monitoring_queue, "Devices readings", "Queue: kafka", "Stores devices data log")
+    ContainerDb(sh_monitoring_readings, "Devices readings", "Container: Clickhouse", "Stores devices data log")
     ContainerQueue(sh_s3, "Object storage", "S3 bucket", "Stores devices blob data (video, images, other files)")   
 
     Rel(sh_monitoring, sh_sessions_kv, "Reads")
     Rel(sh_ui, sh_monitoring, "Api calls", "HTTP/REST")
     Rel(sh_monitoring, sh_monitoring_db, "Reads/Writes", "SQL")
-    Rel_U(sh_monitoring, sh_monitoring_queue, "Reads/Writes")
+    Rel_U(sh_monitoring, sh_monitoring_readings, "Reads/Writes")
     Rel_U(sh_monitoring, sh_s3, "Reads/Writes") 
     Rel(sh_monitoring, smart_device, "Collect devices data", "HTTP/MQTT")
 

@@ -85,7 +85,7 @@
 **Диаграмма компонентов (Components)**
 
 ![smarthouse_user_components](schemas/diagrams/components/smarthouse_user_components.svg)
-
+![smarthouse_monitorings_components](schemas/diagrams/components/smarthouse_monitoring_components.svg)
 **Диаграмма кода (Code)**
 
 Добавьте одну диаграмму или несколько.
