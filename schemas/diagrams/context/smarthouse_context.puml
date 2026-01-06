@@ -1,5 +1,4 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes/puml-theme-C4_brown.puml
 !include <C4/C4_Context>
 
 Person(user, "User", "Home owner")
