@@ -22,6 +22,9 @@ jobs:
         java-version: '25'
         distribution: temurin
         check-latest: true
+    
+    - name: Install Graphviz
+      uses: ts-graphviz/setup-graphviz@v2
 
     - name: Install PlantUML
       run: sudo apt-get install plantuml
