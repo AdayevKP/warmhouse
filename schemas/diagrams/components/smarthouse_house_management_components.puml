@@ -1,5 +1,5 @@
 @startuml
-!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+' !theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
 !include <C4/C4_Context>
 !include <C4/C4_Container>
 !include <C4/C4_Component>
@@ -37,7 +37,4 @@ System_Boundary(smarthouse_system, "Smart House") {
     ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
     Rel(sh_devices_updates_queue, message_handler, "Push devices updates", "AMQP")
 }
-
-
-SHOW_LEGEND()
 @enduml

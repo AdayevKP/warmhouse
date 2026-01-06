@@ -1,5 +1,5 @@
 @startuml
-!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+' !theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
 !include <C4/C4_Context>
 !include <C4/C4_Container>
 
@@ -50,7 +50,4 @@ System_Boundary(smarthouse_system, "Smart House") {
 }
 
 Rel(user, sh_ui, "Views smart devices data, adds new devices, control devices")
-
-
-SHOW_LEGEND()
 @enduml
