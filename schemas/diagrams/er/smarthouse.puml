@@ -1,0 +1,72 @@
+@startuml
+entity User {
+    +id : UUID (PK)
+    --
+    name: str
+    email: str
+    password_hash: str
+}
+
+entity Session {
+    +id : UUID (PK)
+    --
+    session_key: UUID
+    expired_at: timestamp
+}
+
+entity Device {
+    +id : UUID (PK)
+    --
+    name: string
+    connection_info: json
+    type: enum
+    description: str
+    location: str
+    tags: json
+}
+
+entity Scenario {
+    +id : UUID (PK)
+    --
+    name: str
+    user_id: UUID (FK)
+}
+entity DeviceCommand {
+    +id : UUID (PK)
+    --
+    name: str
+    action: enum
+    scenario_id: UUID (FK NULL)
+    priority: int (NULL)
+    device_id: UUID (FK)
+}
+
+entity DeviceBlobData {
+    +id : UUID (PK)
+    --
+    path: str
+    type: enum
+    created_at: timestamp
+    device_id: UUID (FK)
+}
+
+entity DeviceReadings {
+    +id : UUID (PK)
+    --
+    timestamp: timestamp
+    metric_name: str
+    metric_value: double
+    device_id: UUID (FK)
+}
+
+User |o--{ Scenario
+User ||--{ Session
+User |o--{ Device
+
+Device |o--{ DeviceCommand
+Device |o--{ DeviceBlobData
+Device |o--{ DeviceReadings
+Scenario |o--o{ DeviceCommand
+
+
+@enduml
