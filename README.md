@@ -74,20 +74,20 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-![smarthouse_context](schemas/diagrams/context/smarthouse_context.svg)
+![smarthouse_context](schemas/diagrams/context/smarthouse.svg)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
 **Диаграмма контейнеров (Containers)**
 
-![smarthouse_conteiners](schemas/diagrams/containers/smarthouse_containers.svg)
+![smarthouse_conteiners](schemas/diagrams/containers/smarthouse.svg)
 
 **Диаграмма компонентов (Components)**
 
-![smarthouse_user_components](schemas/diagrams/components/smarthouse_user_components.svg)
-![smarthouse_monitorings_components](schemas/diagrams/components/smarthouse_monitoring_components.svg)
-![smarthouse_devices_management_components](schemas/diagrams/components/smarthouse_devices_management_components.svg)
-![smarthouse_house_management_components](schemas/diagrams/components/smarthouse_house_management_components.svg)
+![smarthouse_user_components](schemas/diagrams/components/smarthouse_user.svg)
+![smarthouse_monitorings_components](schemas/diagrams/components/smarthouse_monitoring.svg)
+![smarthouse_devices_management_components](schemas/diagrams/components/smarthouse_devices_management.svg)
+![smarthouse_house_management_components](schemas/diagrams/components/smarthouse_house_management.svg)
 
 **Диаграмма кода (Code)**
 
