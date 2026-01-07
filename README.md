@@ -91,7 +91,7 @@
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+![smarthouse_devices_component_code](schemas/diagrams/code/smarthouse_devices_component.svg)
 
 # Задание 3. Разработка ER-диаграммы
 
