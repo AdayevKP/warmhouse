@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: House Management API
+  description: |
+    API for house management in the Smart House system. Provides endpoints for controlling devices,
+    creating and managing scenarios, and executing device commands. All endpoints require authentication via session cookies.
+  version: 1.0.0
+
+paths:
+  /v1/scenarios:
+    get:
+      description: Retrieves all scenarios belonging to the authenticated user
+      operationId: getAllScenarios
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of user scenarios retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScenarioResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      description: Creates a new scenario for the authenticated user
+      operationId: createScenario
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioCreateRequest'
+      responses:
+        '201':
+          description: Scenario successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/scenarios/{id}:
+    get:
+      description: Retrieves a specific scenario by its ID (must belong to the authenticated user)
+      operationId: getScenarioById
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Scenario UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scenario retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Scenario not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      description: Updates an existing scenario (must belong to the authenticated user)
+      operationId: updateScenario
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Scenario UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioUpdateRequest'
+      responses:
+        '200':
+          description: Scenario updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Scenario not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      description: Deletes a scenario (must belong to the authenticated user)
+      operationId: deleteScenario
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Scenario UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scenario deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Scenario not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/scenarios/{id}/run:
+    post:
+      description: Executes all commands in a scenario
+      operationId: runScenario
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Scenario UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scenario started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Scenario not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/commands:
+    get:
+      description: Retrieves all device commands for the authenticated user
+      operationId: getAllCommands
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: device_id
+          in: query
+          description: Filter commands by device ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of commands retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceCommandResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/commands/{id}:
+    get:
+      description: Retrieves a specific command by its ID
+      operationId: getCommandById
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Command retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceCommandResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Command not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/commands/{id}/run:
+    post:
+      description: Executes a single device command immediately
+      operationId: runCommand
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Command UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Command started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  device_id:
+                    type: string
+                    format: uuid
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Command not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Device control error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+      description: Session ID stored in HTTP-only cookie after login
+
+  schemas:
+    ScenarioCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        commands:
+          type: array
+          description: List of commands in this scenario
+          items:
+            $ref: '#/components/schemas/ScenarioDeviceCommand'
+
+    ScenarioUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        commands:
+          type: array
+          description: List of commands in this scenario
+          items:
+            $ref: '#/components/schemas/ScenarioDeviceCommand'
+
+
+    ScenarioResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Scenario name
+        user_id:
+          type: string
+          format: uuid
+          description: User who owns the scenario
+        commands:
+          type: array
+          description: List of commands in this scenario
+          items:
+            $ref: '#/components/schemas/DeviceCommandInScenario'
+      required:
+        - id
+        - name
+        - user_id
+
+    ScenarioDeviceCommand:
+      type: object
+      required:
+        - command_id
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        priority:
+          type: integer
+          nullable: true
+
+    DeviceCommandInScenario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Command name
+        action:
+          type: string
+          description: Action to perform
+        device_id:
+          type: string
+          format: uuid
+        priority:
+          type: integer
+          nullable: true
+          description: Execution priority
+      required:
+        - id
+        - name
+        - action
+        - device_id
+        - priority
+
+    DeviceCommandResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Command name
+        action:
+          type: string
+          description: Action to perform
+        device_id:
+          type: string
+          format: uuid
+      required:
+        - id
+        - name
+        - action
+        - device_id
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+        - error
