@@ -10,6 +10,7 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "psycopg>=3.3.2",
     "psycopg2-binary>=2.9.11",
+    "aio-pika>=9.0.0",
 ]
 
 [dependency-groups]
@@ -18,3 +19,6 @@ dev = [
     "uv>=0.4.24",
 ]
 
+[[tool.mypy.overrides]]
+module = "aio-pika.*"
+ignore_missing_imports = true
