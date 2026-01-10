@@ -106,6 +106,7 @@ To be контекст
 ### 2. Документация API
 
 [User app REST API](schemas/docs/user_app_api.yaml)
+[Monitoring REST API](schemas/docs/monitoring_api.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 
