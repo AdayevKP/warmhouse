@@ -105,8 +105,9 @@ To be контекст
 
 ### 2. Документация API
 
-[User app REST API](schemas/docs/user_app_api.yaml)
-[Monitoring REST API](schemas/docs/monitoring_api.yaml)
+[User app REST API](schemas/docs/user_app_api.yaml) </br>
+[Monitoring REST API](schemas/docs/monitoring_api.yaml)</br>
+[Device Management REST API](schemas/docs/device_management_api.yaml)</br>
 
 # Задание 5. Работа с docker и docker-compose
 

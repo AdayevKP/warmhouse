@@ -1,0 +1,320 @@
+openapi: 3.0.3
+info:
+  title: Device Management API
+  description: |
+    API for device management in the Smart House system. Provides endpoints for registering,
+    updating, and managing smart devices. All endpoints require authentication via session cookies.
+  version: 1.0.0
+
+
+paths:
+  /v1/devices:
+    get:
+      description: Retrieves all devices belonging to the authenticated user
+      operationId: getAllDevices
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: type
+          in: query
+          description: Filter devices by type
+          required: false
+          schema:
+            type: string
+        - name: location
+          in: query
+          description: Filter devices by location
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of user devices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      description: Registers a new smart device for the authenticated user
+      operationId: createDevice
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreateRequest'
+      responses:
+        '201':
+          description: Device successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/devices/{id}:
+    get:
+      description: Retrieves a specific device by its ID (must belong to the authenticated user)
+      operationId: getDeviceById
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Device retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      description: Updates an existing device (must belong to the authenticated user)
+      operationId: updateDevice
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdateRequest'
+      responses:
+        '200':
+          description: Device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      description: Deletes a device (must belong to the authenticated user)
+      operationId: deleteDevice
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Device deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+      description: Session ID stored in HTTP-only cookie after login
+
+  schemas:
+    DeviceCreateRequest:
+      type: object
+      required:
+        - name
+        - type
+        - connection_info
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Device name
+        type:
+          type: string
+          description: Device type (enum)
+          enum:
+            - temperature_sensor
+            - smart_light
+            - smart_switch
+            - motion_sensor
+            - door_sensor
+            - camera
+            - thermostat
+            - other
+        description:
+          type: string
+          maxLength: 1000
+          description: Device description
+        location:
+          type: string
+          maxLength: 255
+          description: Device location in the house
+        connection_info:
+          type: object
+          description: Device connection information (JSON object)
+          additionalProperties: true
+        tags:
+          type: array
+          description: Device tags for categorization
+          items:
+            type: string
+
+    DeviceUpdateRequest:
+      type: object
+      description: All fields are optional for updates
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Device name
+        description:
+          type: string
+          maxLength: 1000
+          description: Device description
+        location:
+          type: string
+          maxLength: 255
+          description: Device location in the house
+        connection_info:
+          type: object
+          description: Device connection information (JSON object)
+          additionalProperties: true
+        tags:
+          type: array
+          description: Device tags for categorization
+          items:
+            type: string
+
+    DeviceResponse:
+      type: object
+      description: Device information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique device identifier
+        name:
+          type: string
+          description: Device name
+        type:
+          type: string
+          description: Device type
+        description:
+          type: string
+          nullable: true
+          description: Device description
+        location:
+          type: string
+          nullable: true
+          description: Device location in the house
+        connection_info:
+          type: object
+          description: Device connection information (JSON object)
+          additionalProperties: true
+        tags:
+          type: array
+          description: Device tags for categorization
+          items:
+            type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: Device creation timestamp
+      required:
+        - id
+        - name
+        - type
+        - connection_info
+        - created_at
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+        - error
