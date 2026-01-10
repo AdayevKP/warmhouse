@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smarthome-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" 
+    networks:
+      - smarthome-network
+
+  telemetry-postgres:
+    image: postgres:16-alpine
+    container_name: telemetry-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telemetry
+    volumes:
+      - ./telemetry_api/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - telemetry_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - smarthome-network
+
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: smarthome-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - smarthome-network
+
+  temperature-api:
+    build:
+      context: ./temperature_api
+      dockerfile: Dockerfile
+    container_name: temperature-api
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+
+  telemetry-event-consumer:
+    build:
+      context: ./telemetry_api
+      dockerfile: Dockerfile
+    container_name: telemetry-event-consumer
+    depends_on:
+      telemetry-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      - DB_HOST=telemetry-postgres
+      - DB_PORT=5432
+      - DB_NAME=telemetry
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+    command: ["python", "event_handler.py"]
+
+  telemetry-api:
+    build:
+      context: ./telemetry_api
+      dockerfile: Dockerfile
+    container_name: telemetry-api
+    depends_on:
+      telemetry-postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=telemetry-postgres
+      - DB_PORT=5432
+      - DB_NAME=telemetry
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  app:
+    build:
+      context: ./smart_home
+      dockerfile: Dockerfile
+    container_name: smarthome-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      temperature-api:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+      - TEMPERATURE_API_URL=http://temperature-api:8081
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+volumes:
+  postgres_data:
+  telemetry_data:
+  rabbitmq_data:
+
+networks:
+  smarthome-network:
+    driver: bridge
