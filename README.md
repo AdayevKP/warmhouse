@@ -105,7 +105,7 @@ To be контекст
 
 ### 2. Документация API
 
-Здесь приложите ссылки на документацию API для микросервисов, которые вы спроектировали в первой части проектной работы. Для документирования используйте Swagger/OpenAPI или AsyncAPI.
+[User app REST API](schemas/docs/user_app_api.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 
