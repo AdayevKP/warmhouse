@@ -266,6 +266,15 @@ async def update_device(
 
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
+    
+    if device.type == "temperature_sensor" and device.external_id:
+        await smart_home_client.update_sensor(
+            device.external_id, 
+            {
+                'name': device.name,    
+                'location': device.location,
+            }
+        )
 
     if device_data.name is not None:
         device.name = device_data.name
@@ -284,15 +293,6 @@ async def update_device(
     db.refresh(device)
 
     await publish_device_updated_event(device)
-
-    if device.type == "temperature_sensor" and device.external_id:
-        await smart_home_client.update_sensor(
-            device.external_id, 
-            {
-                'name': device.name,    
-                'location': device.location,
-            }
-        )
 
     return DeviceResponse(
         id=device.id,
@@ -315,15 +315,15 @@ async def delete_device(device_id: int, db: Session = Depends(get_db)):
 
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
+    
+    if device.type == "temperature_sensor" and device.external_id:
+        await smart_home_client.delete_sensor(
+            device.external_id, 
+        )
 
     db.delete(device)
     db.commit()
 
     await publish_device_deleted_event(device.id)
-
-    if device.type == "temperature_sensor" and device.external_id:
-        await smart_home_client.delete_sensor(
-            device.external_id, 
-        )
 
     return {"message": "Device deleted successfully"}
