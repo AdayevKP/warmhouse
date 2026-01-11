@@ -164,7 +164,7 @@ async def main():
         while True:
             await asyncio.sleep(1)
     except KeyboardInterrupt:
-        pool.close()
+        await pool.close()
         await connection.close()
 
 if __name__ == "__main__":

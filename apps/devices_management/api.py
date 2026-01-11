@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from rabbitmq import rabbitmq_client
+from http_client import smart_home_client
 from sqlalchemy import (
     ARRAY,
     JSON,
@@ -37,6 +38,7 @@ class DeviceModel(Base):  # type: ignore
     __tablename__ = "devices"
 
     id = Column(Integer, primary_key=True, index=True)
+    external_id = Column(Integer, unique=True, index=True)
     name = Column(String(255), nullable=False)
     type = Column(String(100), nullable=False)
     description = Column(Text)
@@ -188,6 +190,19 @@ async def create_device(
     """
     Registers a new smart device
     """
+    if device_data.type == "temperature_sensor":
+        resp = await smart_home_client.create_sensor(
+            {
+                "name": device_data.name,
+                "type": "temperature_sensor",
+                "location": device_data.location,
+                "unit": "C",
+            }
+        )
+        external_id = resp["id"]
+    else:
+        external_id = None
+
     device = DeviceModel(
         name=device_data.name,
         type=device_data.type,
@@ -195,6 +210,7 @@ async def create_device(
         location=device_data.location,
         connection_info=device_data.connection_info,
         tags=device_data.tags,
+        external_id=external_id,
     )
 
     db.add(device)
@@ -269,6 +285,15 @@ async def update_device(
 
     await publish_device_updated_event(device)
 
+    if device.type == "temperature_sensor" and device.external_id:
+        await smart_home_client.update_sensor(
+            device.external_id, 
+            {
+                'name': device.name,    
+                'location': device.location,
+            }
+        )
+
     return DeviceResponse(
         id=device.id,
         name=device.name,
@@ -295,5 +320,10 @@ async def delete_device(device_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     await publish_device_deleted_event(device.id)
+
+    if device.type == "temperature_sensor" and device.external_id:
+        await smart_home_client.delete_sensor(
+            device.external_id, 
+        )
 
     return {"message": "Device deleted successfully"}
