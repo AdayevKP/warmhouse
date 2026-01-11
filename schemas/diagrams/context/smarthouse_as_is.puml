@@ -7,7 +7,7 @@ Person(employee, "Warmhouse employee", "Support service worker")
 
 System(warmhouse, "Warmhouse", "Allows users to monitor house temperature, and controls heating system")
 Rel(user, warmhouse, "Views house temperature, controls heating system")
-Rel(employee, warmhouse, "Connects new heating system and sesors to Warmhouse system")
+Rel(employee, warmhouse, "Connects new heating system and sensors to Warmhouse system")
 
 System_Ext(heating_system, "Heating system", "Heating system, that can be controlled remotely")
 Rel(warmhouse, heating_system, "Gets data from heating system, controls it")
