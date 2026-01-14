@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: Monitoring API
+  description: |
+    API for monitoring devices in the Smart House system. Provides endpoints for retrieving device readings, 
+    historical data, and blob data (images, videos, files). All endpoints require authentication via session cookies.
+  version: 1.0.0
+
+paths:
+  /v1/devices/{device_id}/readings:
+    get:
+      description: Retrieves readings/metrics for a specific device
+      operationId: getDeviceReadings
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+        - name: metric_name
+          in: query
+          description: Filter by specific metric name
+          required: false
+          schema:
+            type: string
+        - name: start_time
+          in: query
+          description: Start timestamp for time range (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          description: End timestamp for time range (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of readings to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Number of readings to skip (for pagination)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Device readings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device_id:
+                    type: string
+                    format: uuid
+                  readings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeviceReadingResponse'
+                  total:
+                    type: integer
+                    description: Total number of readings matching the query
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/devices/{device_id}/readings/latest:
+    get:
+      description: Retrieves the most recent readings for each metric of a device
+      operationId: getLatestDeviceReadings
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Latest device readings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device_id:
+                    type: string
+                    format: uuid
+                  readings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeviceReadingResponse'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/devices/{device_id}/blob-data:
+    get:
+      description: Retrieves blob data (images, videos, files) for a specific device
+      operationId: getDeviceBlobData
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          description: Device UUID
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          description: Filter by blob data type
+          required: false
+          schema:
+            type: string
+            enum:
+              - image
+              - video
+              - audio
+              - document
+              - other
+        - name: start_time
+          in: query
+          description: Start timestamp for time range (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          description: End timestamp for time range (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of blob data entries to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of entries to skip (for pagination)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Device blob data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device_id:
+                    type: string
+                    format: uuid
+                  blob_data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeviceBlobDataResponse'
+                  total:
+                    type: integer
+                    description: Total number of blob data entries matching the query
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+      description: Session ID stored in HTTP-only cookie after login
+
+  schemas:
+    DeviceReadingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique reading identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: Reading timestamp
+        metric_name:
+          type: string
+          description: Name of the metric
+        metric_value:
+          type: number
+          format: double
+          description: Metric value
+      required:
+        - id
+        - timestamp
+        - metric_name
+        - metric_value
+
+    DeviceBlobDataResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique blob data identifier
+        path:
+          type: string
+          description: Path to the blob data (e.g., S3 path)
+        type:
+          type: string
+          description: Type of blob data
+          enum:
+            - image
+            - video
+            - audio
+            - document
+            - other
+        created_at:
+          type: string
+          format: date-time
+          description: Blob data creation timestamp
+      required:
+        - id
+        - path
+        - type
+        - created_at
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+        - error

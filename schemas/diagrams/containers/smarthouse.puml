@@ -1,0 +1,53 @@
+@startuml
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+
+Person(user, "User", "Home owner")
+System_Ext(smart_device, "Smart devices", "Smart device that can be installed to user's house and can communicate with Smart House system")
+
+System_Boundary(smarthouse_system, "Smart House") {
+    Container(sh_ui, "Browser App", "Container: Frontend web app", "Provides smart house services interface via web browser")
+    
+    Container(sh_user, "User App", "Container: Backend api app", "Provides user registration and personal account")
+    ContainerDb(sh_user_db, "Database", "Container: PostgreSQL")
+    ContainerDb(sh_sessions_kv, "Key-Value Database", "Container: Redis", "Stores active users sessions")
+    Rel(sh_user, sh_sessions_kv, "Writes/invalidates sessions")
+    Rel(sh_ui, sh_user, "Api calls", "HTTP/REST")
+    Rel(sh_user, sh_user_db, "Reads/Writes", "SQL")
+
+    Container(sh_monitoring, "Monitoring API", "Container: Backend api app", "Provides monitoring data for user's devices")
+    ContainerDb(sh_monitoring_db, "Database", "Container: PostgreSQL")
+    ContainerDb(sh_monitoring_readings, "Devices readings", "Container: Clickhouse", "Stores devices data log")
+    ContainerQueue(sh_s3, "Object storage", "S3 bucket", "Stores devices blob data (video, images, other files)")   
+
+    Rel(sh_monitoring, sh_sessions_kv, "Reads")
+    Rel(sh_ui, sh_monitoring, "Api calls", "HTTP/REST")
+    Rel(sh_monitoring, sh_monitoring_db, "Reads/Writes", "SQL")
+    Rel_U(sh_monitoring, sh_monitoring_readings, "Reads/Writes")
+    Rel_U(sh_monitoring, sh_s3, "Reads/Writes") 
+    Rel(sh_monitoring, smart_device, "Collect devices data", "HTTP/MQTT")
+
+    Container(sh_house_management, "House Management API", "Container: Backend api app", "Control devices, allows to create custom scenarios")
+    ContainerDb(sh_house_db, "Database", "Container: PostgreSQL")
+    Rel(sh_ui, sh_house_management, "Api calls", "HTTP/REST")
+    Rel(sh_house_management, sh_house_db, "Reads/Writes", "SQL")
+    Rel_R(sh_house_management, smart_device, "Control devices", "HTTP/MQTT")
+    Rel(sh_house_management, sh_sessions_kv, "Reads")
+
+    Container(sh_devices_management, "Devices Management API", "Container: Backend api app", "Registers devices, gets data from devices")
+    ContainerDb(sh_devices_db, "Database", "Container: PostgreSQL", "")
+
+    Rel(sh_devices_management, sh_sessions_kv, "Reads")
+    Rel(sh_ui, sh_devices_management, "Api calls", "HTTP/REST")
+    Rel(sh_devices_management, sh_devices_db, "Reads/Writes", "SQL")
+    Rel(sh_devices_management, smart_device, "Register devices in system", "HTTP/MQTT")
+
+    ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
+    Rel(sh_devices_management, sh_devices_updates_queue, "Puts devices updates")
+    Rel(sh_devices_updates_queue, sh_monitoring, "Push devices updates", "AMQP")
+    Rel(sh_devices_updates_queue, sh_house_management, "Push devices updates", "AMQP")
+}
+
+Rel(user, sh_ui, "Views smart devices data, adds new devices, control devices")
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Ext(smart_device, "Smart devices", "Smart device that can be installed to user's house and can communicate with Smart House system")
+
+System_Boundary(smarthouse_system, "Smart House") {
+    Container(sh_ui, "Browser App", "Container: Frontend web app", "Provides smart house services interface via web browser")
+    ContainerDb(sh_sessions_kv, "Key-Value Database", "Container: Redis", "Stores active users sessions")
+
+    Container_Boundary(sh_house_management, "House Management API"){
+        Component(api_component, "Api layer", "Handles HTTP requests")
+
+        Component(auth_component, "Authentification component", "Users authentification")
+        Component(message_handler, "Messages handler", "Handles devices updates messages")
+
+        Component(repository, "Devices repository", "Database access")
+        Component(service, "House management service", "Runs commands, runs custom commands, saves custom commands")
+
+        Component(devices_component, "Devices componenet", "Contols devices")
+    }
+    ContainerDb(sh_house_db, "Database", "Container: PostgreSQL")
+    Rel(sh_ui, api_component, "Api calls", "HTTP/REST")
+    Rel(repository, sh_house_db, "Reads/Writes", "SQL")
+    Rel_L(devices_component, smart_device, "Control devices", "HTTP/MQTT")
+    Rel_U(auth_component, sh_sessions_kv, "Reads")
+
+    Rel(api_component, service, "Saves and runs commands")
+    Rel(message_handler, repository, "Updates device data")
+    Rel(service, devices_component, "Run commands")
+    Rel(service, repository, "Reads\Writes commands, reads devices data")
+
+    Rel_L(api_component, auth_component, "Check session expiration")
+    
+    ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
+    Rel(sh_devices_updates_queue, message_handler, "Push devices updates", "AMQP")
+}
+@enduml

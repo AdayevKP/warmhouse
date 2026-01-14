@@ -1,0 +1,106 @@
+asyncapi: 2.6.0
+info:
+  title: Smart House System
+  version: 1.0.0
+  description: |
+    Api for devices events in Smart House system.
+
+servers:
+  rabbitmq:
+    url: amqp://rabbitmq-server:5672
+    protocol: amqp
+    description: RabbitMQ message broker
+    bindings:
+      amqp:
+        exchange:
+          name: device-exchange
+          type: topic
+          durable: true
+          autoDelete: false
+        queue:
+          durable: true
+          exclusive: false
+          autoDelete: false
+
+channels:
+  devices.events:
+    description: Channel for device events
+    messages:
+      deviceCreated:
+        $ref: '#/components/messages/deviceCreated'
+      deviceUpdated:
+        $ref: '#/components/messages/deviceUpdated'
+      deviceDeleted:
+        $ref: '#/components/messages/deviceDeleted'
+        
+components:
+  messages:
+    deviceCreated:
+      name: deviceCreated
+      title: Device Created
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/Device'
+    
+    deviceUpdated:
+      name: deviceUpdated
+      title: Device Updated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/Device'
+    
+    deviceDeleted:
+      name: deviceDeleted
+      title: Device Deleted
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+            description: Unique device identifier
+          deletedAt:
+            type: string
+            format: date-time
+            description: Deletion timestamp
+    
+  schemas:
+    Device:
+      type: object
+      description: Device information
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique device identifier
+        name:
+          type: string
+          description: Device name
+        type:
+          type: string
+          description: Device type
+        description:
+          type: string
+          nullable: true
+          description: Device description
+        location:
+          type: string
+          nullable: true
+          description: Device location in the house
+        connection_info:
+          type: object
+          description: Device connection information (JSON object)
+          additionalProperties: true
+        tags:
+          type: array
+          description: Device tags for categorization
+          items:
+            type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: Device creation timestamp
+
+        

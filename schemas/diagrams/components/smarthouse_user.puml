@@ -1,0 +1,30 @@
+@startuml
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Boundary(smarthouse_system, "Smart House") {
+    Container(sh_ui, "Browser App", "Container: Frontend web app", "Provides smart house services interface via web browser")
+    
+    Container_Boundary(sh_user, "User App") {
+        Component(api_component, "Api layer", "Handles HTTP requests")
+        Component(session_component, "Session Repository", "Database access")
+        Component(user_component, "User Repository", "Database access")
+        Component(auth_component, "Authentication Service", "Business logic for authentification")
+        Component(session_cron_component, "Cron Job", "Invalidates expired sessions")
+
+        Rel(api_component, auth_component, "Register\Login user")
+        Rel(api_component, user_component, "Reads\Writes")
+        Rel(auth_component, user_component, "Reads\Writes user data")
+        Rel(auth_component, session_component, "Creates\Reads session")
+        Rel(session_cron_component, session_component, "Invalidate expired sessions")
+    }
+    ContainerDb(sh_user_db, "Database", "Container: PostgreSQL")
+    ContainerDb(sh_sessions_kv, "Key-Value Database", "Container: Redis", "Stores active users sessions")
+    
+    Rel(sh_ui, api_component, "Api calls", "HTTP/REST")
+    Rel(session_component, sh_sessions_kv, "Writes/Invalidates/Reads sessions")
+    Rel(user_component, sh_user_db, "Reads/Writes", "SQL")
+}
+@enduml

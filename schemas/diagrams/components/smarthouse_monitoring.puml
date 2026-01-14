@@ -1,0 +1,57 @@
+@startuml
+!theme C4_brown from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Ext(smart_device, "Smart devices", "Smart device that can be installed to user's house and can communicate with Smart House system")
+
+System_Boundary(smarthouse_system, "Smart House") {
+    Container(sh_ui, "Browser App", "Container: Frontend web app", "Provides smart house services interface via web browser")
+    
+    ContainerDb(sh_sessions_kv, "Key-Value Database", "Container: Redis", "Stores active users sessions")
+
+    Container_Boundary(sh_monitoring, "Monitoring API") {
+        Component(api_component, "Api layer", "Handles HTTP requests")
+
+        Component(auth_component, "Authentification component", "Users authentification")
+
+        Component(message_handler, "Messages handler", "Handles devices updates messages")
+        Component(monitoring_repository, "Monitoring repository", "Databse access")
+
+        Component(devices_component, "Devices componenet", "Collect data from devices")
+
+        Component(object_repository, "Object repository", "Stores blob data")
+        Component(readings_repository, "Readings repository", "Readings data access")
+
+        Component(monitoring_service, "Monitoring service", "Retrieve all data for device")
+    }
+
+    ContainerQueue(sh_devices_updates_queue, "Devices Updates", "Queue: RabbitMQ", "New devices, devices updates, devices deletion")
+    ContainerDb(sh_monitoring_readings, "Devices readings", "Container: Clickhouse", "Stores devices data log")
+    ContainerQueue(sh_s3, "Object storage", "S3 bucket", "Stores devices blob data (video, images, other files)")   
+    ContainerDb(sh_monitoring_db, "Database", "Container: PostgreSQL")
+    
+    Rel(sh_ui, api_component, "Api calls", "HTTP\REST")
+
+    Rel(api_component, auth_component, "Check session expiration")
+    Rel(api_component, monitoring_service, "Gets device monitoring data")
+
+    Rel(monitoring_service, object_repository, "Reads files")
+    Rel(monitoring_service, readings_repository, "Reads data")
+    Rel(monitoring_service, monitoring_repository, "Gets device info")
+
+    Rel_U(auth_component, sh_sessions_kv, "Reads")
+
+    Rel(message_handler, monitoring_repository, "Reads\Writes")
+    Rel(monitoring_repository, sh_monitoring_db, "Reads\Writes", "SQL")
+    Rel(sh_devices_updates_queue, message_handler, "Push devices updates", "AMQP")
+
+    Rel_L(object_repository, sh_s3, "Reads\Writes")
+    Rel(readings_repository, sh_monitoring_readings, "Reads\Writes", "SQL")
+    Rel(devices_component, smart_device, "Collect devices data", "HTTP\MQTT")
+    Rel_U(devices_component, object_repository, "Writes")
+    Rel_U(devices_component, readings_repository, "Writes")
+    Rel_U(devices_component, monitoring_repository, "Reads")
+}
+@enduml

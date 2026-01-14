@@ -1,0 +1,40 @@
+@startuml
+title Devices-management-container/Devices-component 
+
+class DevicesComponent {
+  connect_device(device_connection_info: ConnInfo)
+  disconnect_device(device_id: UUID)
+  update_device_connection(device_id: UUID, payload: Payload)
+}
+
+class DevicesRepository {
+  get_device(device_id: UUID)
+  update_device(device_id: UUID, body: Device)
+  add_device(body: Device)
+}
+
+class DevicesAdapter {
+  connect_device(connection_info: ConnInfo)
+  get_device_info(connection_info: ConnInfo)
+  disconnect_device(connection_info: ConnInfo)
+}
+
+class DevicesMessagesHandler {
+  handle_device_updates()
+}
+
+class Outbox {
+  send_event(device_id: UUID, body: json)
+}
+
+class MessagesHandler {
+  send_event(device_id: UUID, body: json)
+}
+
+DevicesComponent --> DevicesRepository : uses
+DevicesComponent --> DevicesAdapter : uses
+DevicesComponent --> Outbox : publush device update
+Outbox --> DevicesRepository : gets not published updates
+Outbox --> MessagesHandler : publush device update
+DevicesComponent <-- DevicesMessagesHandler: uses
+@enduml
