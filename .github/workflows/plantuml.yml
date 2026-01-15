@@ -14,19 +14,30 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Generate generate-diagrams
-      uses: plantuml/plantuml-github-action@v1.0.0 
+    - name: Set up Java
+      uses: actions/setup-java@v2
       with:
-        args: '-tsvg schemas/diagrams/**/*.puml'
-          
+        java-version: '25'
+        distribution: temurin
+        check-latest: true
+    
+    - name: Install Graphviz
+      uses: ts-graphviz/setup-graphviz@v2
+
+    - name: Install PlantUML
+      run: sudo apt-get install plantuml
+
+    - name: Generate Diagrams
+      run: |
+        plantuml -tsvg schemas/diagrams/**/*.puml
 
     - name: Commit Diagrams
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add schemas/diagrams/**/*.svg
+        git add schemas/diagrams/**/*.png
         git commit -m "Automated diagram generation"
         git push origin main
       if: success() 
