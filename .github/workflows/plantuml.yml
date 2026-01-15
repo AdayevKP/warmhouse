@@ -31,7 +31,7 @@ jobs:
     - name: Install PlantUML
       run: |
         chmod +x scripts/install-plantuml.sh
-        sudo ./scripts/install-plantuml.sh
+        sudo ./.github/scripts/install-plantuml.sh
 
     - name: Generate Diagrams
       run: |
