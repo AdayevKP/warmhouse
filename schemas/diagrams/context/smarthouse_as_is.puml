@@ -1,5 +1,5 @@
 @startuml
-!include <C4/themes/puml-theme-C4_brown>
+!theme C4_brown from <C4/themes>
 !include <C4/C4_Context>
 
 Person(user, "User", "Home owner")
