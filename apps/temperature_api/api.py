@@ -68,3 +68,6 @@ async def get_temperature_by_sesnor(sensor_id: str) -> TemperatureResponse:
         sensor_type="thermometer",
         description="Indoor temperature sensor",
     )
+
+
+
