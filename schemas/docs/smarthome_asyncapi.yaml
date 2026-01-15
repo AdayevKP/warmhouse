@@ -25,13 +25,12 @@ servers:
 channels:
   devices.events:
     description: Channel for device events
-    messages:
-      deviceCreated:
-        $ref: '#/components/messages/deviceCreated'
-      deviceUpdated:
-        $ref: '#/components/messages/deviceUpdated'
-      deviceDeleted:
-        $ref: '#/components/messages/deviceDeleted'
+    publish:
+      message:
+        oneOf:
+          - $ref: '#/components/messages/deviceCreated'
+          - $ref: '#/components/messages/deviceUpdated'
+          - $ref: '#/components/messages/deviceDeleted'
         
 components:
   messages:
