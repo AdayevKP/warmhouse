@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - schemas/diagrams/**/*.puml
   pull_request:
     branches:
       - main
+    paths:
+      - schemas/diagrams/**/*.puml
 
 jobs:
   generate-diagrams:
