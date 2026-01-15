@@ -27,7 +27,9 @@ jobs:
       uses: ts-graphviz/setup-graphviz@v2
 
     - name: Install PlantUML
-      run: sudo apt-get install plantuml
+      run: |
+        chmod +x scripts/install-plantuml.sh
+        sudo ./scripts/install-plantuml.sh
 
     - name: Generate Diagrams
       run: |
@@ -37,7 +39,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add schemas/diagrams/**/*.png
+        git add schemas/diagrams/**/*.svg
         git commit -m "Automated diagram generation"
         git push origin main
       if: success() 
